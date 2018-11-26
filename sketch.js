@@ -1,15 +1,24 @@
+var transportapi
+
+function preload() {
+  var url = 'https://transportapi.com/v3/uk/bus/stop/490000073V///timetable.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&group=route'
+  loadJSON(url,gotData);
+  loadJSON(url2,gotData2);
+}
+
 
 function setup() {
-  createCanvas( 600, 600 );
-var url = 'https://transportapi.com/v3/uk/bus/stop/490000073V///timetable.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&group=route'
-loadJSON(url,gotData);
+  createCanvas( 800, 800 );
+//var url = 'https://transportapi.com/v3/uk/bus/stop/490000073V///timetable.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&group=route'
+//loadJSON(url,gotData);
 
 //console.log(loadJSON);
 
 }
+
 function gotData(data){
 	//console.log(data);
-	departures = data;
+	transportapi = data;
 }
 
 //function gotWeather(weather) {
@@ -33,7 +42,7 @@ push();
 textSize(100);
 textFont("Montserrat");
 textStyle(BOLD);
-translate(100,190);
+translate(100,300);
 rotate(45);
 text( sec, 0, 0);
 pop();
@@ -42,27 +51,28 @@ pop();
 // this creates a new drawing state
 push();
 // done in degrees
-translate(0,140);
+translate(0,280);
 rotate(90);
 textSize(150);
 // replace with font name
 textFont("Montserrat");
 textStyle(BOLD);
+fill('blue');
 text(m, 0, 0);
 // this restores canvas to normal for another rotation
 pop();
 
 	//hour
 push();
-textSize(200);
+textSize(400);
 textFont("Montserrat");
 textStyle(BOLD);
-fill('#B7990D');
-text( h, 6, 145 );
-stroke('black');
-strokeWeight(3);
-fill(0, 0);
-text( h, 0, 140 );
+fill('black');
+text( h, 6, 280 );
+//stroke('black');
+//strokeWeight(3);
+//fill(0, 0);
+//text( h, 0, 140 );
 
 pop();
 
@@ -80,14 +90,28 @@ text('', 0, 0);
 // this restores canvas to normal for another rotation
 pop();
 
-if (weather) {
+
 push();
 textSize(100);
 textFont("Montserrat");
 textStyle(BOLD);
-text(departures[2].departures.12.aimed_departure_time, 300, 300);
+text(transportapi.departures["12"][0].aimed_departure_time, 300, 300);
+
 pop();
-}
+push();
+textSize(50);
+textFont("Montserrat");
+textFont(BOLD);
+//text(data[3].departures.12.line_name,300,300);
+pop();
+
+push();
+textSize(50);
+textFont("Montserrat");
+textFont(BOLD);
+text('t  r  a  n  s  p  o  r  t ',300,300);
+pop();
+
 
 
 }
