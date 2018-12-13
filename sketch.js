@@ -5,6 +5,8 @@ var stretch
 var busespassed
 var busespassed = 0
 var previoustime
+var trainspassed
+var trainspassed = 0
 //var nowtime = hour() + ":" + minute()
 
 function preload() {
@@ -17,8 +19,10 @@ function preload() {
 function populateStorage() {
   console.log('populateStorage')
   localStorage.setItem('busespassed', busespassed);
+  localStorage.setItem('trainspassed', trainspassed);
 
   getBusValue();
+  getTrainValue();
 }
 
 function getBusValue() {
@@ -27,10 +31,17 @@ function getBusValue() {
   busespassed = float(busespassed);
 }
 
+function getTrainValue() {
+  console.log('getTrainValue')
+  trainspassed = localStorage.getItem('trainspassed');
+  trainspassed = float(trainspassed);
+}
+
+
 function loadData(){
   console.log('loadData');
   var url = 'https://transportapi.com/v3/uk/bus/stop/490000073V///timetable.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&group=route'
-  var url2 = 'https://transportapi.com/v3/uk/train/station/EPH/live.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&darwin=false&train_status=passenger'
+  var url2 = 'https://transportapi.com/v3/uk/train/station/EPH/live.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&darwin=false&operator=LT&train_status=passenger'
   loadJSON(url, gotData);
   loadJSON(url2, gotTrainData);
 }
@@ -38,10 +49,11 @@ function loadData(){
 
 
 function setup() {
-  if(!localStorage.getItem('busespassed')) {
+  if(!localStorage.getItem('busespassed','trainspassed')) {
     populateStorage();
   } else {
     getBusValue();
+    getTrainValue();
   }
   createCanvas(windowWidth, windowHeight);
   //var nowtime = hour() + ":" + minute()
@@ -58,6 +70,7 @@ function setup() {
   // this refreshes the data after a bit
   setInterval(loadData, 60000);
   setInterval(populateStorage, 60000)
+  var colorset = '#FAB603'
 
 }
 
@@ -80,6 +93,18 @@ function gotData(data) {
 function gotTrainData(data) {
   trainData = data
   var nowtime = hour() + ":" + nf(minute(),2,0);
+  if (nowtime === trainData.departures["all"][0].aimed_departure_time) {
+    trainspassed = trainspassed + 1
+  }
+  if (nowtime === trainData.departures["all"][1].aimed_departure_time) {
+    trainspassed = trainspassed + 1
+  }
+  if (nowtime === trainData.departures["all"][2].aimed_departure_time) {
+    trainspassed = trainspassed + 1
+  }
+  console.log(trainData.departures["all"][0].aimed_departure_time);
+  console.log(trainspassed);
+
 }
 
 //function gotWeather(weather) {
@@ -240,6 +265,19 @@ function draw() {
   rotate(0);
   fill('black')
   text(transportapi.stop_name,0,0,100);
+  translate(0,0)
+  translate(-450,300)
+  rotate(90);
+  text(trainData.station_name,0,0,0);
+  rotate(-90);
+  translate(50,150);
+  textSize(200);
+  fill('#FAB603')
+  text(trainspassed,0,0);
+  translate(400,-100)
+  fill('black')
+  textStyle(NORMAL)
+  text(trainData.station_code,0,0);
   pop();
 
   //previoustime = nowtime
