@@ -1,4 +1,5 @@
 var transportapi
+var trainData
 var img1
 var pg
 var stretch
@@ -11,6 +12,7 @@ var trainspassed = 0
 
 function preload() {
   loadData();
+  loadTrainData();
   //loadJSON(url2, gotData2);
 }
 
@@ -41,12 +43,16 @@ function getTrainValue() {
 function loadData(){
   console.log('loadData');
   var url = 'https://transportapi.com/v3/uk/bus/stop/490000073V///timetable.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&group=route'
-  var url2 = 'https://transportapi.com/v3/uk/train/station/EPH/live.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&darwin=false&operator=LT&train_status=passenger'
+  //var url2 = 'https://transportapi.com/v3/uk/train/station/EPH/live.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&darwin=false&operator=LT&train_status=passenger'
   loadJSON(url, gotData);
-  loadJSON(url2, gotTrainData);
+  //loadJSON(url2, gotTrainData);
 }
 
-
+function loadTrainData(){
+  console.log('loadTrainData');
+  var url2 = 'https://transportapi.com/v3/uk/train/station/EPH/live.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&darwin=false&operator=LT&train_status=passenger'
+  loadJSON(url2, gotTrainData);
+}
 
 function setup() {
   if(!localStorage.getItem('busespassed','trainspassed')) {
@@ -60,22 +66,24 @@ function setup() {
   //var busespassed = 0
 
   console.log(busespassed);
-  img1 = loadImage("assets/gradient1.png");
+  //img1 = loadImage("assets/gradient1.png");
   bus12 = loadImage("assets/12BUSB.png");
   //var url = 'https://transportapi.com/v3/uk/bus/stop/490000073V///timetable.json?app_id=ca103b63&app_key=8bc99f71886bd7095a865df6dcb5c46a&group=route'
   //loadJSON(url,gotData);
 
-  console.log(transportapi.departures["12"][0].line);
+  //console.log(transportapi.departures["12"][0].line);
   stretch = createGraphics(width,200);
   // this refreshes the data after a bit
   setInterval(loadData, 60000);
+  setInterval(loadTrainData, 60000)
   setInterval(populateStorage, 60000)
+  //setInterval(gotTrainData, 30000)
   var colorset = '#FAB603'
 
 }
 
 function gotData(data) {
-  //console.log(data);
+  //console.log(gotData);
   transportapi = data;
   var nowtime = hour() + ":" + nf(minute(),2,0);
   if (nowtime === transportapi.departures["12"][0].aimed_departure_time) {
@@ -91,19 +99,21 @@ function gotData(data) {
 }
 
 function gotTrainData(data) {
+  //console.log(gotTrainData);
   trainData = data
-  var nowtime = hour() + ":" + nf(minute(),2,0);
-  if (nowtime === trainData.departures["all"][0].aimed_departure_time) {
+  var fasttime = hour() + ":" + nf(minute()+1,2,0);
+  if (fasttime === trainData.departures["all"][0].aimed_departure_time) {
     trainspassed = trainspassed + 1
   }
-  if (nowtime === trainData.departures["all"][1].aimed_departure_time) {
+  if (fasttime === trainData.departures["all"][1].aimed_departure_time) {
     trainspassed = trainspassed + 1
   }
-  if (nowtime === trainData.departures["all"][2].aimed_departure_time) {
+  if (fasttime === trainData.departures["all"][2].aimed_departure_time) {
     trainspassed = trainspassed + 1
   }
   console.log(trainData.departures["all"][0].aimed_departure_time);
   console.log(trainspassed);
+  console.log(fasttime);
 
 }
 
@@ -119,10 +129,13 @@ function draw() {
   var m = minute();
   var sec = second();
   var d = day();
+  var bg = color('white')
+  var accent = color('#0CCE6B');
+  var txt = color('black');
   pg = createGraphics(width*2,450);
   //var nowtime = hour() + ":" + minute()
 
-  background(255, 255, 255);
+  background(bg);
   angleMode(DEGREES);
 
   // this is how i am going to count the number of buses
@@ -142,10 +155,11 @@ function draw() {
   textFont('Rubik');
   //second
   push();
-  fill('#FAB603');
+  fill(accent);
   noStroke();
   ellipse(1200,0,1000);
   rect(50,200,500,100);
+  rect(200,550,width,100);
   pop();
 
   push();
@@ -177,7 +191,7 @@ function draw() {
   push();
   textSize(400);
   textStyle(BOLD);
-  fill('black');
+  fill(txt);
   //text( h, 6, 280 );
   //stroke('black');
   //strokeWeight(3);
@@ -220,7 +234,7 @@ function draw() {
   //fill('#3023AE')
   //strokeWeight(2);
   //stroke('black')
-  fill('black')
+  fill(txt)
   text('buses passed',10,250, 50);
   pop();
 
@@ -234,7 +248,7 @@ function draw() {
   pg.textSize(200);
   pg.textStyle(BOLD);
   pg.textFont('Rubik');
-  pg.fill('#FAB603');
+  pg.fill(accent);
   //pg.text(transportapi.departures["12"][0].line,0,0);
   pg.text(busespassed,10, 160, 50);
   //pg.text('BUS',0,-180);
@@ -247,7 +261,7 @@ function draw() {
   textSize(200);
   textStyle(BOLD);
   textFont('Rubik');
-  fill('black');
+  fill(txt);
   //img1.mask(pg);
   //image(img1, 0, 0, width*2,400);
   translate(760,20);
@@ -263,7 +277,7 @@ function draw() {
   textStyle(BOLD);
   translate(600,50);
   rotate(0);
-  fill('black')
+  fill(txt)
   text(transportapi.stop_name,0,0,100);
   translate(0,0)
   translate(-450,300)
@@ -272,10 +286,13 @@ function draw() {
   rotate(-90);
   translate(50,150);
   textSize(200);
-  fill('#FAB603')
+  fill(accent)
   text(trainspassed,0,0);
+  //translate(0,200);
+  fill(txt)
+  text('trains passed',0,150);
   translate(400,-100)
-  fill('black')
+  fill(txt)
   textStyle(NORMAL)
   text(trainData.station_code,0,0);
   pop();
